@@ -1,7 +1,28 @@
 const productContent = document.getElementById('products-list');
 
-const getProducts = async (url, categoryId) => {
-    const res = await fetch(url + '/products', {
+const getAllProducts = async () => {
+    const res = await fetch(urlApi + '/products', {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json, text/plain, */*',
+            'Content-Type': 'application/json',
+        }
+    });
+
+    const json = await res.json();
+
+    productContent.innerHTML = '';
+
+    json.data.forEach(product => {
+        drawProducts(product);
+    })
+
+    console.log(json);
+}
+
+const filterByCategory = async (categoryId) => {
+
+    const res = await fetch(urlApi + '/products', {
         method: 'POST',
         headers: {
             'Accept': 'application/json, text/plain, */*',
@@ -12,11 +33,12 @@ const getProducts = async (url, categoryId) => {
 
     const json = await res.json();
 
+    productContent.innerHTML = '';
+
     json.data.forEach(product => {
         drawProducts(product);
     })
 
-    console.log(json);
 }
 
 const drawProducts = p=> {
@@ -49,4 +71,4 @@ const drawProducts = p=> {
     productContent.insertAdjacentHTML('beforeEnd', categoryHTML);
 }
 
-getProducts(urlApi, 1);
+getAllProducts();

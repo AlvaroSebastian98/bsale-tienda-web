@@ -15,13 +15,13 @@ const getCategories = async (url) => {
 
 const drawCategories = c => {
     const categoryName = c.name[0].toUpperCase() + c.name.substr(1, c.name.length);
-    const categoryHTML = `<a id=${c.id} href="#" class="list-group-item">${categoryName}</a>`;
+    const categoryHTML = `<a id=${c.id} href="#" class="list-group-item" onclick="filterByCategory(${c.id})">${categoryName}</a>`;
     categoryContent.insertAdjacentHTML('beforeEnd', categoryHTML);
 
-    filterByCategory(c.id, categoryName);
+    changeTitle(c.id, categoryName);
 }
 
-const filterByCategory = (id, categoryName) => {
+const changeTitle = (id, categoryName) => {
 
     const title = document.getElementById('category-title');
 
@@ -29,9 +29,6 @@ const filterByCategory = (id, categoryName) => {
         event.preventDefault();
         title.innerHTML = categoryName;
     }, false);
-
-    // Filter data
-    
 }
 
 getCategories(urlApi);
