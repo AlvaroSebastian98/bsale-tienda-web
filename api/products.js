@@ -1,7 +1,14 @@
 const productContent = document.getElementById('products-list');
+const paginationContent = document.getElementById('pagination-content');
 
-const getAllProducts = async () => {
-    const res = await fetch(urlApi + '/products', {
+const getAllProducts = async (numberPage) => {
+
+    console.log('gewrra')
+
+    const title = document.getElementById('category-title');
+    title.innerHTML = 'Últimos';
+
+    const res = await fetch(urlApi + '/products?page=' + numberPage, {
         method: 'GET',
         headers: {
             'Accept': 'application/json, text/plain, */*',
@@ -10,14 +17,19 @@ const getAllProducts = async () => {
     });
 
     const json = await res.json();
+    const pages = Math.ceil(json.total / 9);
 
     productContent.innerHTML = '';
+    paginationContent.innerHTML = '';
 
-    json.data.forEach(product => {
+    (json.data || []).forEach(product => {
         drawProducts(product);
-    })
+    });
 
-    console.log(json);
+    for (let page = 1; page <= pages; page++) {
+        drawPagination(page, 'all');
+    }
+
 }
 
 const filterByCategory = async (categoryId) => {
@@ -32,16 +44,55 @@ const filterByCategory = async (categoryId) => {
     });
 
     const json = await res.json();
+    const pages = Math.ceil(json.total / 9);
 
     productContent.innerHTML = '';
+    paginationContent.innerHTML = '';
 
-    json.data.forEach(product => {
+    (json.data || []).forEach(product => {
         drawProducts(product);
-    })
+    });
+
+    for (let page = 1; page <= pages; page++) {
+        drawPagination(page, 'category');
+    }
 
 }
 
-const drawProducts = p=> {
+const filterByName = async (e) => {
+
+    e.preventDefault();
+
+    const productName = document.getElementById('product-name');
+    const title = document.getElementById('category-title');
+    title.innerHTML = productName.value;
+
+    const res = await fetch(urlApi + '/products/filter', {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json, text/plain, */*',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: productName.value })
+    });
+
+    const json = await res.json();
+    const pages = Math.ceil(json.total / 9);
+
+    productContent.innerHTML = '';
+    paginationContent.innerHTML = '';
+
+    (json.data || []).forEach(product => {
+        drawProducts(product);
+    })
+
+    for (let page = 1; page <= pages; page++) {
+        drawPagination(page, 'name');
+    }
+
+}
+
+const drawProducts = p => {
     const imageUrl = p.url_image || 'assets/images/no-image.svg';
 
     const categoryHTML = `
@@ -71,4 +122,35 @@ const drawProducts = p=> {
     productContent.insertAdjacentHTML('beforeEnd', categoryHTML);
 }
 
-getAllProducts();
+const drawPagination = (page, type) => {
+
+    let method = getAllProducts;
+
+    switch (type) {
+        case 'all':
+            method = getAllProducts;
+            break;
+
+        case 'category':
+            method = filterByCategory;
+            break;
+
+        case 'name':
+            method = filterByName;
+            break;
+
+        default:
+            break;
+    }
+
+    const paginationHTML = `
+        <li id="page-${page}" class="page-item"><a class="page-link" href="#">${page}</a></li>
+    `;
+
+    // paginationContent.innerHTML += paginationHTML;
+    paginationContent.insertAdjacentHTML('beforeEnd', paginationHTML);
+    document.getElementById(`page-${page}`).addEventListener("click", () => method(page));
+
+}
+
+getAllProducts(1);
