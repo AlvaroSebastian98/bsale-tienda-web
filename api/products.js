@@ -1,9 +1,12 @@
 const productContent = document.getElementById('products-list');
 const paginationContent = document.getElementById('pagination-content');
 
-const getAllProducts = async (numberPage) => {
+let publicIdPage;
+let publicCategoryId;
+let publicProductName;
+let publicEvent;
 
-    console.log('gewrra')
+const getAllProducts = async (numberPage = 1) => {
 
     const title = document.getElementById('category-title');
     title.innerHTML = 'Últimos';
@@ -17,24 +20,29 @@ const getAllProducts = async (numberPage) => {
     });
 
     const json = await res.json();
-    const pages = Math.ceil(json.total / 9);
 
-    productContent.innerHTML = '';
-    paginationContent.innerHTML = '';
+    if(json.success) {
+        const pages = Math.ceil(json.total / 9);
 
-    (json.data || []).forEach(product => {
-        drawProducts(product);
-    });
+        productContent.innerHTML = '';
+        paginationContent.innerHTML = '';
 
-    for (let page = 1; page <= pages; page++) {
-        drawPagination(page, 'all');
+        (json.data || []).forEach(product => {
+            drawProducts(product);
+        });
+
+        for (let page = 1; page <= pages; page++) {
+            drawPagination(page, 'all');
+        }
     }
 
 }
 
-const filterByCategory = async (categoryId) => {
+const filterByCategory = async (categoryId, numberPage) => {
 
-    const res = await fetch(urlApi + '/products', {
+    publicCategoryId = categoryId
+
+    const res = await fetch(urlApi + '/products?page=' + numberPage, {
         method: 'POST',
         headers: {
             'Accept': 'application/json, text/plain, */*',
@@ -44,36 +52,43 @@ const filterByCategory = async (categoryId) => {
     });
 
     const json = await res.json();
-    const pages = Math.ceil(json.total / 9);
 
-    productContent.innerHTML = '';
-    paginationContent.innerHTML = '';
+    if(json.success) {
 
-    (json.data || []).forEach(product => {
-        drawProducts(product);
-    });
+        const pages = Math.ceil(json.total / 9);
 
-    for (let page = 1; page <= pages; page++) {
-        drawPagination(page, 'category');
+        productContent.innerHTML = '';
+        paginationContent.innerHTML = '';
+
+        (json.data || []).forEach(product => {
+            drawProducts(product);
+        });
+
+        for (let page = 1; page <= pages; page++) {
+            drawPagination(page, 'category');
+        }
+
     }
 
 }
 
-const filterByName = async (e) => {
+const filterByName = async (e, page) => {
 
     e.preventDefault();
 
-    const productName = document.getElementById('product-name');
+    const publicProductName = document.getElementById('product-name').value;
     const title = document.getElementById('category-title');
-    title.innerHTML = productName.value;
+    title.innerHTML = publicProductName;
 
-    const res = await fetch(urlApi + '/products/filter', {
+    publicEvent = e;
+
+    const res = await fetch(urlApi + '/products/filter?page=' + page, {
         method: 'POST',
         headers: {
             'Accept': 'application/json, text/plain, */*',
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name: productName.value })
+        body: JSON.stringify({ name: publicProductName })
     });
 
     const json = await res.json();
@@ -124,33 +139,48 @@ const drawProducts = p => {
 
 const drawPagination = (page, type) => {
 
-    let method = getAllProducts;
-
-    switch (type) {
-        case 'all':
-            method = getAllProducts;
-            break;
-
-        case 'category':
-            method = filterByCategory;
-            break;
-
-        case 'name':
-            method = filterByName;
-            break;
-
-        default:
-            break;
-    }
-
     const paginationHTML = `
-        <li id="page-${page}" class="page-item"><a class="page-link" href="#">${page}</a></li>
+        <li id="${type}-page-${page}" class="page-item"><a class="page-link" href="#">${page}</a></li>
     `;
 
-    // paginationContent.innerHTML += paginationHTML;
     paginationContent.insertAdjacentHTML('beforeEnd', paginationHTML);
-    document.getElementById(`page-${page}`).addEventListener("click", () => method(page));
+
+    if(publicIdPage === `${type}-page-${page}`) {
+        let itemPage = document.getElementById(publicIdPage);
+        itemPage.classList.add("active");
+    }
+
+    document.getElementById(`${type}-page-${page}`).addEventListener("click", (e) => {
+
+        e.preventDefault();
+        publicIdPage = `${type}-page-${page}`;
+
+        let method;
+
+        switch (type) {
+            case 'all':
+                method = getAllProducts(page);
+                break;
+
+            case 'category':
+                method = filterByCategory(publicCategoryId, page);
+                break;
+
+            case 'name':
+                method = filterByName(publicEvent, page);
+                break;
+
+            default:
+                method = getAllProducts(page);
+                break;
+        }
+
+        window.scroll({ top: 'auto', behavior: 'smooth' });
+
+        return method;
+
+    });
 
 }
 
-getAllProducts(1);
+getAllProducts();
