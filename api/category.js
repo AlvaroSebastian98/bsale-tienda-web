@@ -1,4 +1,4 @@
-const urlApi = 'https://bsale-tienda-api.herokuapp.com';
+const urlApi = 'http://localhost:3000';
 
 const categoryContent = document.getElementById('categories-list');
 
