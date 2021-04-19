@@ -125,7 +125,7 @@ const drawProducts = p => {
                     ${p.discount > 0 ? (
                         `
                         <span class="position-absolute top-0 start-10 translate-middle badge bg-danger">
-                            $${p.discount} desc.
+                            ${p.discount}% desc.
                         <span class="visually-hidden">unread messages</span></span>
                         `
                     ) : ''}
