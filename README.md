@@ -3,7 +3,7 @@
 
 ## Ejercicio de postulación
 _Aplicación web que lista productos filtrados por categoría y nombre construida con Vanilla JavaScript_
-_El REST API que brinda la información se encuentra en este [repositorio](https://github.com/AlvaroSebastian98/bsale-tienda-api)_
+_El REST API que brinda la información se encuentra en este [repositorio](https://github.com/AlvaroSebastian98/bsale-tienda-api)._
 
 ## Preview
 
